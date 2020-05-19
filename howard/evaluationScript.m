@@ -1,0 +1,24 @@
+clear;
+f = imread('cameraman.tif');
+n = 1000;
+
+A = creerColonne();
+B = modifierElement4(A);
+i = nombrePairsEntre178et2600();
+B = initialiser34(A,i);
+fct = nomDeLaFonction();
+[A,B,C] = initABC();
+% estEgal = testMultiplication(A,B);
+% S = tailleResultatMultiplication(A,B);
+% B = changerColonne3x3(A);
+% B = doublerLigne3x3(A);
+% H = calculerHist(A);
+% C = extraireCentre9x9(ones(9));
+% F = Fibonacci();
+% S = calculerSomme(n);
+% g = translationCompressionHist(f);
+% g = imageNegative(f);
+% g = transformeeGamma(f);
+% g = egaliserHist(f);
+% image_out = redimensionnementPPV( f, 0.5);
+% reponse = question20Performance();
