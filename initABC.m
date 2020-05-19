@@ -1,0 +1,8 @@
+function [A,B,C] = initABC()
+%INITABC Summary of this function goes here
+%   Detailed explanation goes here
+    A=[81 89 52; 90 47 25;34 12 68]
+    B=[46 90 4;29 17 68;31 19 73]
+    C=[75 62;43 99;20 36]
+end
+
