@@ -9,10 +9,7 @@ B = initialiser34(A,i);
 fct = nomDeLaFonction();
 [A,B,C] = initABC();
 estEgal = testMultiplication(A,B);
-%
-
-%
-% S = tailleResultatMultiplication(A,B);
+S = tailleResultatMultiplication(A,B);
 % B = changerColonne3x3(A);
 % B = doublerLigne3x3(A);
 % H = calculerHist(A);
