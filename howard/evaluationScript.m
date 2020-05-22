@@ -1,6 +1,5 @@
 clear;
 f = imread('cameraman.tif');
-corn = imread('corn.tif', 2);
 n = 1000;
 
 A = creerColonne();
@@ -21,5 +20,5 @@ g = translationCompressionHist(f);
 % g = imageNegative(f);
 % g = transformeeGamma(f);
 % g = egaliserHist(f);
-% image_out = redimensionnementPPV( f, 0.5);
+image_out = redimensionnementPPV(f, 0.5);
 % reponse = question20Performance();
