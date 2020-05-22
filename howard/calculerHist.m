@@ -16,6 +16,7 @@
 % attentivement votre fonction! Par exemple, calculerHist(0)
 % retourne [1 0 0 0 ...] et calculerHist(255) retourne [0 0 0 ... 1].
 function [outputResult] = calculerHist(A)
-    h = histogram(A,1:256);
-    outputResult = h.Values;
+    %h = histogram(A,1:256);
+    matrixVal = histcounts(A,1:256);
+    outputResult = matrixVal;
 end
