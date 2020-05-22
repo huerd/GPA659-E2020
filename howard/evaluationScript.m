@@ -1,5 +1,6 @@
 clear;
 f = imread('cameraman.tif');
+corn = imread('corn.tif', 2);
 n = 1000;
 
 A = creerColonne();
@@ -16,7 +17,7 @@ H = calculerHist(f);
 C = extraireCentre9x9(ones(9));
 % F = Fibonacci();
 S = calculerSomme(10^6);
-% g = translationCompressionHist(f);
+g = translationCompressionHist(f);
 % g = imageNegative(f);
 % g = transformeeGamma(f);
 % g = egaliserHist(f);
