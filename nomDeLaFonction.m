@@ -9,6 +9,5 @@
 % Resources  : https://www.mathworks.com/help/matlab/matlab_prog/fundamental-matlab-classes.html
 function [output] = nomDeLaFonction()
     functionName = "clear"; % double quotations are strings
-%     functionName = 'clear'; % single quotations are immediately char vectors
     output = convertStringsToChars(functionName);
 end
