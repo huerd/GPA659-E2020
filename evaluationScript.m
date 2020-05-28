@@ -19,6 +19,6 @@ S = calculerSomme(10^6);
 g = translationCompressionHist(f);
 g = imageNegative(f);
 g = transformeeGamma(f);
-% g = egaliserHist(f);
+g = egaliserHist(f);
 image_out = redimensionnementPPV(f, 0.5);
 % reponse = question20Performance();
