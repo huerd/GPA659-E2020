@@ -3,5 +3,5 @@
 % suivantes : PPV, imresize mode interppv, bicubique and bilineare
 
 function [outputResult] = question20Performance()
-    outputResult = [ 3 2 4 1 ];
+    outputResult = [ 4 2 3 1 ];
 end
