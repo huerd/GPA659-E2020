@@ -1,5 +1,3 @@
-% Fonction 19
-% function that converts to greyscale and resizes
 function [ image_out ] = redimensionnementPPV(image_in, facteur )
     % seule les images en niveau de gris sont acceptées
     if size(image_in,3) ~= 1

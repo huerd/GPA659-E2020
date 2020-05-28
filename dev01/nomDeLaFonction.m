@@ -7,7 +7,7 @@
 % caractères en MATLAB 
 
 % Resources  : https://www.mathworks.com/help/matlab/matlab_prog/fundamental-matlab-classes.html
-function [output] = nomDeLaFonction()
+function fct = nomDeLaFonction()
     functionName = "clear"; % double quotations are strings
-    output = convertStringsToChars(functionName);
+    fct = convertStringsToChars(functionName);
 end

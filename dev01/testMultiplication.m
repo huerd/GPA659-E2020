@@ -6,8 +6,8 @@
 
 % Consulter les documents d’introduction ou l’aide en ligne afin de bien comprendre la
 % différence entre ces deux opérations
-function [outputResult] = testMultiplication(inputA, inputB)
-    prodMatrix = inputA*inputB;
-    prodArray = inputA.*inputB;
-    outputResult = isequal(prodMatrix, prodArray);
+function estEgal = testMultiplication(A, B)
+    prodMatrix = A*B;
+    prodArray = A.*B;
+    estEgal = isequal(prodMatrix, prodArray);
 end
