@@ -21,12 +21,13 @@ g = imageNegative(f);
 g = transformeeGamma(f);
 g = egaliserHist(f);
 image_out = redimensionnementPPV(f, 0.5);
+
 reponse = question20Performance();
 
 % % Code to test each resize function
 % clear;
 % f = imread('cameraman.tif');
-% N = 50;
+% N = 1;
 % testResults = zeros(4,N);
 % for scale = 2:2:N*2
 %     tic
