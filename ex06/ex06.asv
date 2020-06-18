@@ -1,0 +1,8 @@
+M = zeros(500, 500);
+imshow(M);
+set(gcf,'color','black');
+line(randi(500,1,2), randi(500,1,2));
+M = rgb2gray(imnoise(frame2im(getframe(gcf))));
+close all;
+imshow(M);
+seuillage = M > 
