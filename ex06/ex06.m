@@ -6,7 +6,7 @@ M = rgb2gray(imnoise(frame2im(getframe(gcf))));
 close all;
 imshow(M);
 seuillage = M > 50;
-imshowpair(M,seuillage,'montage');
+% imshowpair(M,seuillage,'montage');
 % The function hough() also returns the Standard Hough Transform, H, which is a
 % parameter space matrix whose rows and columns correspond to rho and theta
 % values respectively.
