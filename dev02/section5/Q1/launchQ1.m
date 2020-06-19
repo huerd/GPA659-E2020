@@ -1,28 +1,55 @@
 f = imread('navette.jpg');
 % TEST = imshow(log(abs(fftshift(fft2(f)))),[]);
 spectrumLogMagnitude = afficherMagnitudeFourier(f);
-figure(1), imshowpair(f,spectrumLogMagnitude,'montage');
-title('Original Image vs spectrumLogMagnitude', 'FontSize', 20)
+% figure(1), imshowpair(f,spectrumLogMagnitude,'montage');
+% title('Original Image vs spectrumLogMagnitude', 'FontSize', 20)
 
 % %%----------------------------%%area of the histogram
-resultHistogram = histogram(f)
-title('Histogram Distribution', 'FontSize', 20)
-counts = resultHistogram.Values;
-sum_counts = sum(counts);
-width = resultHistogram.BinWidth;
-area = sum_counts*width;
+% resultHistogram = histogram(f)
+% title('Histogram Distribution', 'FontSize', 20)
+% counts = resultHistogram.Values;
+% sum_counts = sum(counts);
+% width = resultHistogram.BinWidth;
+% area = sum_counts*width;
 %----------------------------%area of the histogram
 % equalHist = histcounts(f,0:256);
 
+processed = medfilt2(f,[5,5]);
+currentMSE = loopSolution(processed);
+processed = medfilt2(processed,[2,2]);
+currentMSE = loopSolution(processed);
+processed = medfilt2(processed,[3,3]);
+currentMSE = loopSolution(processed);
+processed = medfilt2(processed,[1,1]);
+currentMSE = loopSolution(processed);
+processed = medfilt2(processed,[3,3]);
+currentMSE = loopSolution(processed);
+processed = medfilt2(processed,[5,5]);
+currentMSE = loopSolution(processed);
+
+
+
+
+
+
+%----------------------------% LOW PASS
+% a=histogram(f);
+% passe1 = medfilt2(f,[3,5]);
+% a1=histogram(passe1);
+% passe2 = medfilt2(passe1,[9,1]);
+% passe3 = medfilt2(passe2,[3,5]);
+% passe4 = medfilt2(passe3,[1,1]);
+% passe5 = medfilt2(passe4,[1,1]);
+% g = medfilt2(passe5,[3,1]);
 %%----------------------------%% Butterworth
-[Du, Dv] = size(f); % taille du masque identique à celle de f
-D = @(u,v) ((u-Du/2).^2 + (v-Dv/2).^2).^0.5; % distance euclidienne au centre
-D0 = 1500; % inner ring
-W = 3000; % outer ring
-[v,u] = meshgrid(1:Dv,1:Du);
-filter = double((D(u,v) < D0) | (D(u,v) > (D0+W)));
-figure(2), imshowpair(f,filter,'montage');
-title('Original Image vs Freq Mask', 'FontSize', 20)
+% [M, N] = size(f); % taille du masque identique à celle de f
+% D = @(u,v) ((u-M/2).^2 + (v-N/2).^2).^0.5; % distance euclidienne au centre
+% D0 = 15; % inner ring
+% W = 3000; % outer ring
+% [v,u] = meshgrid(1:N,1:M);
+% filter = double((D(u,v) < D0) | (D(u,v) > (D0+W)));
+% figure(2), imshowpair(f,filter,'montage');
+% title('Original Image vs Freq Mask', 'FontSize', 20)
 %%----------------------------%%filder
 % filterImpl = fspecial('gaussian',size(f));
 %%----------------------------%% colFit
@@ -60,7 +87,7 @@ title('Original Image vs Freq Mask', 'FontSize', 20)
 % g = appliquerFiltreFrequentiel(f,medFilter);
 % g = filtrerImageQ1(f);
 % Display Comparison Results
-g = appliquerFiltreFrequentiel(f,filter);
-figure(3), imshowpair(f,g,'montage');
+% g = appliquerFiltreFrequentiel(f,filter);
+figure(3), imshowpair(f,processed,'montage');
 title('Original Image vs Final Image', 'FontSize', 20)
 erreur = evaluerSolutionQ1(g);
