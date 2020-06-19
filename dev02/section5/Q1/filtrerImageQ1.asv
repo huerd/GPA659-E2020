@@ -1,0 +1,5 @@
+function [imageFiltree] = filtrerImageQ1(image)
+h = [-1 0 1];
+
+imageFiltree = imfilter(imfilter(image,h),h,'conv');
+end
