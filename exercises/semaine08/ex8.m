@@ -3,6 +3,7 @@ figure(1), imshow(imgBricks);
 imgCarpet = imread("carpet.jpg");
 figure(2), imshow(imgCarpet);
 
+
 lbpBricks = extractLBPFeatures(imgBricks, 'Upright', false);
 lbpCarpet = extractLBPFeatures(imgCarpet, 'Upright', false);
 
@@ -19,4 +20,16 @@ y1 = randi(size(M,2)/2) + size(M,2)/2;
 M = M(x0 :x1, y0 :y1);
 M = imrotate(M, randi(5), "crop");
 
-figure(3), imshow(M);
+lbpM = extractLBPFeatures(M, 'Upright', false);
+
+euclidDistBricks = norm(lbpBricks - lbpM);
+euclidDistCarpet = norm(lbpCarpet - lbpM);
+
+if (euclidDistBricks < euclidDistCarpet)
+    figure(3), imshow(M);
+    title("M contient de la brique");
+else
+    figure(3), imshow(M);
+    title("M contient du tapis");
+end
+
