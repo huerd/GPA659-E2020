@@ -52,10 +52,9 @@ figure(2), scatter3(X(:), Y(:), Z(:), S(:), C,'filled')
 PDF = histogramme3d ./ sum(histogramme3d(:));
 
 idx = sub2ind(size(PDF),X(:),Y(:),Z(:));
-% 
 prob = PDF(idx);
-
-figure(3), imshow(reshape(prob, size(idx)));
+figure(3), plotmatrix(prob, idx);
+% figure(3), imshow(reshape(prob, size(idx)));
 
 % 
 % [extractR, extractG, extractB] = size(histogramme3dprob);
