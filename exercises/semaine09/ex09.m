@@ -8,11 +8,6 @@ histogramme3d = zeros(64,64,64);
 % get the size and number of channels
 [m, n, numColorChannels] = size(doubleImage);
 
-% seperate the channels
-channelR = doubleImage(:,:,1);
-channelG = doubleImage(:,:,2);
-channelB = doubleImage(:,:,3);
-
 for x = 1:m
     for y = 1:n
         % extract values from each color channel
@@ -53,3 +48,23 @@ C = [X(:) Y(:) Z(:)]/64;
 % show 3d histogram
 figure(2), scatter3(X(:), Y(:), Z(:), S(:), C,'filled')
 
+% normalize histogram for probability density
+PDF = histogramme3d ./ sum(histogramme3d(:));
+
+idx = sub2ind(size(PDF),X(:),Y(:),Z(:));
+% 
+prob = PDF(idx);
+
+figure(3), imshow(reshape(prob, size(idx)));
+
+% 
+% [extractR, extractG, extractB] = size(histogramme3dprob);
+% 
+% 
+% 
+% % convert 3d coords to 1d index
+% idx = sub2ind(size(PDF),ipR(:),ipG(:),ipB(:));
+% 
+% prob = PDF(idx);
+% 
+% figure(3), imshow(prob);
