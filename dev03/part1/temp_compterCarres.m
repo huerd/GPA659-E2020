@@ -32,8 +32,12 @@ b1 = strel('square', 3);
 C = imdilate(recImage, b1);
 D = imerode(C, b1);
 
-% result = bwhitmiss(imageMat,b1, b2);
+% -- class notes HIT OR MISS implementation
+% erosion1 =  A - b1
+% erosion2 = !A - b2
+% hitmissResult = ero1 AND ero2
 
+% result = bwhitmiss(imageMat,b1, b2);
 
 % saves results for output of function
 decompte = tableResults;
