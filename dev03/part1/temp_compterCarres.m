@@ -26,13 +26,14 @@ tableResults = zeros(1,20, 'uint32');
 
 % converts image to a matrix w/ labelled connected components
 % and the number of total shapes
-[imageMat, numberFormes] = bwlabel(recImage);
+[imageMat, numberFormesA] = bwlabel(recImage);
 
-b1 = strel('square', 4);
-C = imopen(recImage, b1);
+b1 = strel('square', 3);
+C = imdilate(recImage, b1);
+D = imerode(C, b1);
 
 % result = bwhitmiss(imageMat,b1, b2);
-imshowpair(~recImage,C,'montage');
+
 
 % saves results for output of function
 decompte = tableResults;
@@ -40,3 +41,6 @@ decompte = tableResults;
 % ----------------------------- DEBUG
 % because the background is black, invert it when imshow
 % figure(1), imshow(~recImage);
+[imageMat2, numberFormesA2] = bwlabel(C);
+[imageMat3, numberFormesA3] = bwlabel(D);
+imshowpair(~recImage,C,'montage');

@@ -1,1 +1,1 @@
-result01 = compterCarres(imread('carres.png'));
+result01 = temp_compterCarres(imread('carres.png'));
