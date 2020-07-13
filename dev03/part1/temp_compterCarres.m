@@ -28,13 +28,15 @@ tableResults = zeros(1,20, 'uint32');
 % and the number of total shapes
 [imageMat, numberFormes] = bwlabel(recImage);
 
-se = strel(square, 3);
-decomp = getsequence(se);
-decomp(1);
+b1 = strel('square', 4);
+C = imopen(recImage, b1);
+
+% result = bwhitmiss(imageMat,b1, b2);
+imshowpair(~recImage,C,'montage');
 
 % saves results for output of function
 decompte = tableResults;
 
 % ----------------------------- DEBUG
 % because the background is black, invert it when imshow
-figure(1), imshow(~recImage);
+% figure(1), imshow(~recImage);
