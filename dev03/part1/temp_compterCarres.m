@@ -28,8 +28,11 @@ tableResults = zeros(1,20, 'uint32');
 % and the number of total shapes
 [imageMat, numberFormes] = bwlabel(recImage);
 
+se = strel(square, 3);
+decomp = getsequence(se);
+decomp(1);
 
-
+% saves results for output of function
 decompte = tableResults;
 
 % ----------------------------- DEBUG
