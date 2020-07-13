@@ -1,0 +1,1 @@
+result01 = compterCarres(imread('carres.png'));
