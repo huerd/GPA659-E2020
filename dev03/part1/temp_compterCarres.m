@@ -26,16 +26,19 @@ tableResults = zeros(1,20, 'uint32');
 
 % converts image to a matrix w/ labelled connected components
 % and the number of total shapes
-[imageMat, numberFormesA] = bwlabel(recImage);
+[imageMat, numberFormesA] = bwlabel(recImage, 4);
 
 b1 = strel('square', 3);
-C = imdilate(recImage, b1);
-D = imerode(C, b1);
+C = imerode(recImage, b1);
+C2 = imerode(~recImage,b1);
+res = C & C2;
+% D = imerode(C, b1);
 
 % -- class notes HIT OR MISS implementation
 % erosion1 =  A - b1
 % erosion2 = !A - b2
 % hitmissResult = ero1 AND ero2
+
 
 % result = bwhitmiss(imageMat,b1, b2);
 
@@ -46,5 +49,5 @@ decompte = tableResults;
 % because the background is black, invert it when imshow
 % figure(1), imshow(~recImage);
 [imageMat2, numberFormesA2] = bwlabel(C);
-[imageMat3, numberFormesA3] = bwlabel(D);
-imshowpair(~recImage,C,'montage');
+% [imageMat3, numberFormesA3] = bwlabel(D);
+imshowpair(~recImage,~C2,'montage');
