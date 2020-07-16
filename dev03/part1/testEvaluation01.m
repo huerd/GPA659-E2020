@@ -1,1 +1,7 @@
-result01 = temp_compterCarres(imread('carres.png'));
+% clean environment
+clc;
+close all; 
+clear;
+workspace; 
+
+result01 = compterCarres(imread('carres.png'));
