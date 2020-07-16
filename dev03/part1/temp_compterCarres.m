@@ -16,7 +16,6 @@ image = imread('carres.png');
 %       RESOURCES
 % https://www.mathworks.com/help/images/ref/bwhitmiss.html
 
-
 % ============== start ======================
 
 % store received image
@@ -28,35 +27,40 @@ tableResults = zeros(1,20, 'uint32');
 % and the number of total shapes
 [imageMat, numberFormesA] = bwlabel(recImage);
 
-shapeSize = 15;
+shapeSize = 5;
 
 erode1_ES = strel('square', shapeSize);
 erode1 = imerode(recImage, erode1_ES);
+
+% we want to detect single pixels
+hit = [0 0 0; 
+       0 1 0; 
+       0 0 0]
+   
+% omit non-single pixels
+miss=~hit
+
+hitmissResult = bwhitmiss(erode1,hit,miss);
+
 dilate1_ES = strel('square', shapeSize);
 dilate1 = imdilate(erode1, dilate1_ES);
 
 stateToRemove = dilate1;
-
 subtractedState = and(recImage, ~stateToRemove);
 
-% D = imerode(C, b1);
-
-% -- class notes HIT OR MISS implementation
-% erosion1 =  A - b1
-% erosion2 = !A - b2
-% hitmissResult = ero1 AND ero2
-
-
-% result = bwhitmiss(imageMat,b1, b2);
 
 % saves results for output of function
 decompte = tableResults;
 
 % ----------------------------- DEBUG
 % because the background is black, invert it when imshow
-% figure(1), imshow(~recImage);
-[imageMat2, numberFormesA2] = bwlabel(dilate1);
-% [imageMat3, numberFormesA3] = bwlabel(D);
+
+% count the squares after erode/dilate
+[imageMat2, numberFormesA2] = bwlabel(stateToRemove);
+% count the pixels after hitmiss
+[imageMat4, numberFormesA4] = bwlabel(hitmissResult);
+% count after subtraction
+[imageMat3, numberFormesA3] = bwlabel(subtractedState);
 
 % subplots/display
 subplot(2,3,1)
@@ -76,8 +80,8 @@ imshow(~subtractedState)
 title('subtractedState');
 
 subplot(2,3,5)
-imshow('Fraises.jpg')
-title('Erode1');
+imshow(hitmissResult)
+title('hitmiss');
 
 subplot(2,3,6)
 imshow('Fraises.jpg')
