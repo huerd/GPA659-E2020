@@ -38,10 +38,14 @@ hit = [0 0 0;
        0 0 0]
    
 % omit non-single pixels
-miss=~hit
+%   [ 1 1 1; 
+%     1 0 1; 
+%     1 1 1 ]
 
-hitmissResult = bwhitmiss(erode1,hit,miss);
+% use hitmiss to count single pixel hits
+hitmissResult = bwhitmiss(erode1, hit, ~hit);
 
+% dilate single pixels to shape, subtract from original
 dilate1_ES = strel('square', shapeSize);
 dilate1 = imdilate(erode1, dilate1_ES);
 
