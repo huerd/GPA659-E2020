@@ -50,7 +50,10 @@ figure(4)
 imshow(stereoAnaglyph(I1Rect, I2Rect));
 title('Stereo Anaglyph');
 
+i1rectgray = rgb2gray(I1Rect);
+i2rectgray = rgb2gray(I2Rect);
+
 figure(5)
-imshow(disparity(rgb2gray(I1Rect),rgb2gray(I2Rect),'DisparityRange',[0 128]));
+imshow(disparity(i1rectgray,i2rectgray,'DisparityRange',[0 128]));
 % colormap jet
 colorbar
