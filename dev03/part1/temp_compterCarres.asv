@@ -39,6 +39,8 @@ stateToRemove = dilate1;
 
 subtractedState = and(recImage, ~stateToRemove);
 
+
+
 % D = imerode(C, b1);
 
 % -- class notes HIT OR MISS implementation
