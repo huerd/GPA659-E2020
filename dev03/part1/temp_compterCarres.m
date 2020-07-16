@@ -26,12 +26,13 @@ tableResults = zeros(1,20, 'uint32');
 
 % converts image to a matrix w/ labelled connected components
 % and the number of total shapes
-[imageMat, numberFormesA] = bwlabel(recImage, 4);
+[imageMat, numberFormesA] = bwlabel(recImage);
 
-b1 = strel('square', 3);
-C = imerode(recImage, b1);
-C2 = imerode(~recImage,b1);
-res = C & C2;
+erode1_ES = strel('square', 15);
+erode1 = imerode(recImage, erode1_ES);
+dilate1_ES = strel('square', 15);
+dilate1 = imdilate(erode1, dilate1_ES);
+
 % D = imerode(C, b1);
 
 % -- class notes HIT OR MISS implementation
@@ -48,6 +49,18 @@ decompte = tableResults;
 % ----------------------------- DEBUG
 % because the background is black, invert it when imshow
 % figure(1), imshow(~recImage);
-[imageMat2, numberFormesA2] = bwlabel(C);
+[imageMat2, numberFormesA2] = bwlabel(erode1);
 % [imageMat3, numberFormesA3] = bwlabel(D);
-imshowpair(~recImage,~C2,'montage');
+
+% subplots/display
+subplot(1,3,1)
+imshow(~recImage)
+title('Original');
+
+subplot(1,3,2)
+imshow(~erode1)
+title('Erode1');
+
+subplot(1,3,3)
+imshow(~dilate1)
+title('Dilate1');
