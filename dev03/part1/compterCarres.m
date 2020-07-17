@@ -1,6 +1,15 @@
 function decompte = compterCarres(image)
 %  -------------------------------------------- Prep Stage
 
+% convert to logical if it isn't
+if (~islogical(image))
+    % ensure to conver to grayscale if not
+    if (size(image,3) == 3)
+        image = rgb2gray(image);
+    end
+    image = logical(image);
+end
+
 % size of table (also equiv to square dimen)
 tableSize = 20;
 % store received image
