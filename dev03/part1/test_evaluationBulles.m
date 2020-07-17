@@ -4,4 +4,4 @@ close all;
 clear;
 workspace; 
 
-result01 = compteBulles(imread('bulles.bmp'));
+[bulle, groupes] = compteBulles(imread('bulles.bmp'));
