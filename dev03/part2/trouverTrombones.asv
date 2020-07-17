@@ -10,10 +10,7 @@ L = bwconncomp(bw);
 s = regionprops(L, 'centroid');
 centroids = cat(1, s.Centroid);
 [n,d] = size(centroids);
-if((n/2)> 0)
-   n = round(n/2);
-end
-[idx,C] = kmeans(centroids,n, 'distance','sqeuclidean');
+[idx,C] = kmeans(centroids,n/2, 'distance','sqeuclidean');
 C = round(C);
 imshow(f),hold(imgca,'on')
 plot(imgca,C(:,1), C(:,2), 'r*')
