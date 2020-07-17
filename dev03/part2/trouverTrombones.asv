@@ -2,7 +2,7 @@
 %TROUVERTROMBONES Summary of this function goes here
 %   Detailed explanation goes here
 
-f=im2double(imread('trbn1.jpg'));
+f=imread('trbn1.jpg');
 hsv=rgb2hsv(f);
 b= hsv(:,:,2) > (graythresh(hsv(:,:,2))-0.08);
 bw = imfill(b,'holes');
@@ -10,15 +10,24 @@ L = bwconncomp(bw);
 s = regionprops(L, 'centroid');
 centroids = cat(1, s.Centroid);
 [n,d] = size(centroids);
-[idx,C] = kmeans(centroids,n/2, 'distance','sqeuclidean');
-C = round(C);
+if((n/2)> 0)
+   n = round(n/2);
+end
+[idx,CC] = kmeans(centroids,n, 'distance','sqeuclidean');
+CC = round(CC);
 imshow(f),hold(imgca,'on')
-plot(imgca,C(:,1), C(:,2), 'r*')
+plot(imgca,CC(:,1), C(:,2), 'r*')
 hold(imgca,'off');
 x=C(:,1);
 y=C(:,2);
-c=[];
-%'rouge', 'vert', 'bleu', 'mauve', 'rose','jaune', 'blanc'.
+c
+k=impixel(f,x,y);
+for i = 1:n
+    
+end
+C= empty(n);
 
+%'rouge', 'vert', 'bleu', 'mauve', 'rose','jaune', 'blanc'.
 %end
+
 
