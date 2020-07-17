@@ -83,8 +83,7 @@ end
 % -------------------------------------------- transfer results
 decompte = tableResults;
 
-% ----------------------------- DEBUG
-% because the background is black, invert it when imshow
+% ----------------------------- DEBUG subplot displays
 
 % bwlabel of original image
 [originalMat, numOriginal] = bwlabel(originalImg);
@@ -92,28 +91,19 @@ decompte = tableResults;
 [recMat, numRec] = bwlabel(recImage);
 
 % subplots/display
-subplot(2,3,1)
+subplot(2,2,1)
 imshow(originalMat)
 title('Original');
 
-subplot(2,3,2)
+subplot(2,2,2)
 imshow(recImageMat)
 title('recMat');
 
-subplot(2,3,3)
+subplot(2,2,3)
 imshow(~erode1)
 title('Erode');
 
-subplot(2,3,4)
+subplot(2,2,4)
 imshow(~stateToRemove)
 title('stateToRemove');
-
-subplot(2,3,5)
-imshow('Fraises.jpg')
-title('Placeholder');
-
-subplot(2,3,6)
-imshow('Fraises.jpg')
-title('Placeholder');
-
 
