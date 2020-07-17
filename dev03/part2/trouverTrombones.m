@@ -4,19 +4,15 @@ function [x,y,c] = trouverTrombones(image)
 
 f=im2double(imread('trbn1.jpg'));
 hsv=rgb2hsv(f);
-t = hsv-f;
-c=t(:,:,3);
-m3=medfilt2(c);
-gf3=m3>graythresh(m3);
-bloss= gf3+t-f;
-
-%methode recommander ****
-f=im2double(imread('trbn1.jpg'));
-hsv=rgb2hsv(f);
-
-b= hsv(:,:,2) > (graythresh(hsv(:,:,2))+0.08);
-c= hsv(:,:,3) > (graythresh(hsv(:,:,3))-0.08);
-dc= b+c-f;
+b= hsv(:,:,2) > (graythresh(hsv(:,:,2))-0.08);
+bw = imfill(b,'holes');
+L = bwlabel(bw);
+s = regionprops(L, 'centroid');
+centroids = cat(1, s.Centroid);
+imshow(f)
+hold(imgca,'on')
+plot(imgca,centroids(:,1), centroids(:,2), 'r*')
+hold(imgca,'off')
 
 CC=bwconncomp(dc);
 S = regionprops(CC, 'Centroid');
