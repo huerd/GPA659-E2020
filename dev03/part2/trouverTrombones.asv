@@ -4,6 +4,22 @@
 
 f=imread('trbn1.jpg');
 hsv=rgb2hsv(f);
+mr=hsv(:,:,1);
+mg=hsv(:,:,2);
+mb=hsv(:,:,3);
+
+lab = rgb2lab(f);
+lt = lab(:,:,1);
+at = lab(:,:,2);
+bt = lab(:,:,3);
+
+%masque_red = ?;
+%masque_blue = ?;
+%masque_green = ?;
+%masque_yellow = vecnorm(cat(3,a,b) -cat(3,red_a,red_b),2,3) < 20;
+%masque_purple = vecnorm(cat(3,a,b) -cat(3,red_a,red_b),2,3) < 20;
+%masque_pink = vecnorm(cat(3,a,b) -cat(3,red_a,red_b),2,3) < 20;
+%masque_white = vecnorm(cat(3,a,b) -cat(3,red_a,red_b),2,3) < 20;
 b= hsv(:,:,2) > (graythresh(hsv(:,:,2))-0.08);
 bw = imfill(b,'holes');
 L = bwconncomp(bw);
@@ -16,17 +32,15 @@ end
 [idx,CC] = kmeans(centroids,n, 'distance','sqeuclidean');
 CC = round(CC);
 imshow(f),hold(imgca,'on')
-plot(imgca,CC(:,1), C(:,2), 'r*')
+plot(imgca,CC(:,1), CC(:,2), 'r*')
 hold(imgca,'off');
-x=C(:,1);
-y=C(:,2);
-c
+x=CC(:,1);
+y=CC(:,2);
+c=[];
 k=impixel(f,x,y);
 for i = 1:n
-    
+    c=[c;getNameFromRGB(k(i,1),k(i,2),k(i,3))];
 end
-C= empty(n);
-
 %'rouge', 'vert', 'bleu', 'mauve', 'rose','jaune', 'blanc'.
 %end
 

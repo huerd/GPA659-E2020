@@ -4,6 +4,16 @@
 
 f=imread('trbn1.jpg');
 hsv=rgb2hsv(f);
+mr=hsv(:,:,1);
+mg=hsv(:,:,2);
+mb=hsv(:,:,3);
+%masque_red = ?;
+%masque_blue = ?;
+%masque_green = ?;
+%masque_yellow = ?;
+%masque_purple = ?;
+%masque_pink = ?;
+%masque_white = ?;
 b= hsv(:,:,2) > (graythresh(hsv(:,:,2))-0.08);
 bw = imfill(b,'holes');
 L = bwconncomp(bw);
@@ -23,7 +33,8 @@ y=CC(:,2);
 c=[];
 k=impixel(f,x,y);
 for i = 1:n
-    c=[c;getNameFromRGB(k(i))];
+    %envoyer vers la fonction ou appliquer les filtres
+    c=[c;getNameFromRGB(k(i,1),k(i,2),k(i,3))];
 end
 %'rouge', 'vert', 'bleu', 'mauve', 'rose','jaune', 'blanc'.
 %end
