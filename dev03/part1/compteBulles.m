@@ -1,8 +1,12 @@
 function [bulle, groupes] = compteBulles(image)
 
-% convert to gray if it isn't
-if (size(image,3) == 3)
-    image = rgb2gray(image);
+% convert to logical if it isn't
+if (~islogical(image))
+    % ensure to conver to grayscale if not
+    if (size(image,3) == 3)
+        image = rgb2gray(image);
+    end
+    image = logical(image);
 end
 
 % store received image

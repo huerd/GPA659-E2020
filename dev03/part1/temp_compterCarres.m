@@ -25,6 +25,15 @@ workspace;
 
 image = imread('carres.png');
 
+% convert to logical if it isn't
+if (~islogical(image))
+    % ensure to conver to grayscale if not
+    if (size(image,3) == 3)
+        image = rgb2gray(image);
+    end
+    image = logical(image);
+end
+
 % size of table (also max possible sizes of square)
 tableSize = 20
 % store received image
