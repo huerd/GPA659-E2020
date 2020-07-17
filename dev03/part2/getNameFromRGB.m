@@ -9,11 +9,8 @@ function [colorName] = getNameFromRGB(r,g,b)
     fprintf('%i |', r);
     fprintf('%i |', b);
     fprintf('%i | ', g)
-    if( r >= 110 && r<=130 && g >= 45 && g<=255 && b >=45 && b <=255 )
-        colorName = 'bleu';
-    else
-        colorName = 'blanc';
-    end
+    %colorName = 'bleu';
+    %colorName = 'blanc';
     %colorName = 'rouge';
     %colorName = 'vert';
     %colorName = 'jaune';
