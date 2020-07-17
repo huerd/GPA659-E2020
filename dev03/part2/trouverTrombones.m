@@ -1,96 +1,40 @@
-function [x,y,c] = trouverTrombones(image)
-% clean environment
-clc;
-close all; 
-clear;
-workspace; 
+%function [x,y,c] = trouverTrombones(image)
+%TROUVERTROMBONES Summary of this function goes here
+%   Detailed explanation goes here
 
-image = im2double(imread('trbn1.jpg'));
-
-imgHSV = rgb2hsv(image);
-
-imgHSVTreshed = imgHSV(:,:,2) > (graythresh(imgHSV(:,:,2))-0.08);
-
-imgFilled = imfill(imgHSVTreshed,'holes');
-
-L = bwlabel(imgFilled);
+f=imread('trbn1.jpg');
+hsv=rgb2hsv(f);
+mr=hsv(:,:,1);
+mg=hsv(:,:,2);
+mb=hsv(:,:,3);
+%masque_red = ?;
+%masque_blue = ?;
+%masque_green = ?;
+%masque_yellow = ?;
+%masque_purple = ?;
+%masque_pink = ?;
+%masque_white = ?;
+b= hsv(:,:,2) > (graythresh(hsv(:,:,2))-0.08);
+bw = imfill(b,'holes');
+L = bwconncomp(bw);
 s = regionprops(L, 'centroid');
 centroids = cat(1, s.Centroid);
-
-x=[];
-y=[];
-c=[];
-%'rouge', 'vert', 'bleu', 'mauve', 'rose','jaune', 'blanc'.
-
-% % % ----------------------------- DEBUG subplot display outputs
-% used for debugging
-% make sure to uncomment the first method code to use this
-subplot(3,3,1)
-imshow(image)
-hold(imgca,'on')
-plot(imgca,centroids(:,1), centroids(:,2), 'r*')
-hold(imgca,'off')
-title(['Original']);
-
-subplot(3,3,2)
-imshow(imgHSV)
-% hold on
-% viscircles(centerpointAll,radiusAll,'Color','b');
-% hold off
-title('imgHSV');
-
-subplot(3,3,3)
-imshow(imgHSVTreshed)
-% hold on
-% viscircles(centerpointAll,radiusAll,'Color','b');
-% hold off
-title('imgHSVTreshed');
-
-subplot(3,3,4)
-imshow(imgFilled)
-% hold on
-% viscircles(centerpointAll,radiusAll,'Color','b');
-% hold off
-title('imgFilled');
-
-subplot(3,3,5)
-imshow(image)
-title('PLACEHOLDER');
-
-subplot(3,3,6)
-imshow(imgHSVTreshed)
-% hold on
-% viscircles(centerpointAll,radiusAll,'Color','b');
-% hold off
-title('PLACEHOLDER');
-
-subplot(3,3,7)
-imshow(imgHSVTreshed)
-% hold on
-% viscircles(centerpointAll,radiusAll,'Color','b');
-% hold off
-title('PLACEHOLDER');
-
-subplot(3,3,8)
-imshow(imgHSVTreshed)
-% hold on
-% viscircles(centerpointAll,radiusAll,'Color','b');
-% hold off
-title('PLACEHOLDER');
-
-subplot(3,3,9)
-imshow(imgHSVTreshed)
-% hold on
-% viscircles(centerpointAll,radiusAll,'Color','b');
-% hold off
-title('PLACEHOLDER');
-
-figure(2)
-imshow(image)
-hold(imgca,'on')
-plot(imgca,centroids(:,1), centroids(:,2), 'r*')
-hold(imgca,'off')
-title(['Original + Centroids']);
-
+[n,d] = size(centroids);
+if((n/2)> 0)
+   n = round(n/2);
 end
-
+[idx,CC] = kmeans(centroids,n, 'distance','sqeuclidean');
+CC = round(CC);
+imshow(f),hold(imgca,'on')
+plot(imgca,CC(:,1), CC(:,2), 'r*')
+hold(imgca,'off');
+x=CC(:,1);
+y=CC(:,2);
+c=[];
+k=impixel(f,x,y);
+for i = 1:n
+    %envoyer vers la fonction ou appliquer les filtres
+    c=[c;getNameFromRGB(k(i,1),k(i,2),k(i,3))];
+end
+%'rouge', 'vert', 'bleu', 'mauve', 'rose','jaune', 'blanc'.
+%end
