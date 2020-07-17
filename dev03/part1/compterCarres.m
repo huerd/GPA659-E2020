@@ -2,7 +2,7 @@ function decompte = compterCarres(image)
 %  -------------------------------------------- Prep Stage
 
 % size of table (also equiv to square dimen)
-tableSize = 20
+tableSize = 20;
 % store received image
 recImage = image;
 % generate a 1x20 table to store final results
@@ -12,7 +12,7 @@ tableResults = zeros(1, tableSize, 'uint32');
 % in this stage, we will remove all formes that are not perfect squares
 
 % get all connected components of image
-pretreat = bwconncomp(recImage)
+pretreat = bwconncomp(recImage);
 % extract the number of pixels for each conn.comp
 numPixels = cellfun(@numel,pretreat.PixelIdxList);
 
