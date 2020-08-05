@@ -19,7 +19,7 @@ file_GT='GT'; % dossier contenant le ground truth.
 % Il y a 50 images dans le fichier, vous pouvez choisir un nombre entre 1 et 50
 im_number = 30; 
 % le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
-lambda = 5; 
+lambda = 25; 
 
 %% Chargement de l'image, initialisation et affichage
 image_name = image_set{im_number};
@@ -37,11 +37,6 @@ masque = (Rectangle==128);
 % elle ne sait sait pas qu'il s'agit d'une image, elle opere sur des noeuds
 % de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
 probabilitesParPixel = [objProbabilitees(:), bkgProbabilitees(:)]';
-
-% figure(1)
-% imshow(objProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilite) que le pixel apartienne e l''avant-plan')
-% figure(2)
-% imshow(bkgProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilite) que le pixel apartienne e l''arriere-plan')
 
 %% Initialisation de la librarie de coupe de graph
 % 1) on definit les parmetres de regularisation
@@ -65,11 +60,10 @@ BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grab
 clear BKhandle;
 
 %% Affichage de la solution
-% figure; imagesc(image); axis image; axis off; hold on;
-% [c,h] = contour(L, 'LineWidth',3,'Color', 'r');
-% title(sprintf('Solution du GrabCut - energie = %.2f',E)) % note: on cherche e minimiser l'energie
-
 % ==============================================
+% plot positioning
+figure1=figure('Position', [1500, 100, 1024, 1200]);
+
 subplot(2,2,1)
 imshow(objProbabilitees,[]), colormap('jet'), colorbar
 title('-log(prob) que le pixel apartienne avant-plan')
