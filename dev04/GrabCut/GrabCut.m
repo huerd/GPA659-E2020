@@ -4,7 +4,6 @@ clc;
 Addpath_items;
 
 %% Voici la liste des images sur laquelle nous pouvons tester le grabcut
-im_number = 13; % Il y a 50 images dans le fichier, vous pouvez choisir un nombre entre 1 et 50
 image_set = {'38801G','banana1','banana2','banana3','book','bool','bush','ceramic','cross','doll',...
     'elefant','flower','fullmoon','grave','llama','memorial','music','person1','person2', 'person3',...
     'person4', 'person5', 'person6', 'person7','person8','scissors','sheep','stone1','stone2','teddy',...
@@ -16,13 +15,18 @@ file_image='Images'; % dossier contenant les images
 file_rectangle='Rectangle'; % dossier contenant les rectangles (segmentation initiale approximative)
 file_GT='GT'; % dossier contenant le ground truth.
 
-lambda=5; % le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
+%% Variables qu'on peut modifier
+% Il y a 50 images dans le fichier, vous pouvez choisir un nombre entre 1 et 50
+im_number = 30; 
+% le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
+lambda = 5; 
 
 %% Chargement de l'image, initialisation et affichage
 image_name = image_set{im_number};
 img_file = dir(fullfile(file_image, [image_name '.*']));
 groundTruth = imread(fullfile(file_GT, [image_name '.bmp']));
 image = imread(fullfile(file_image, img_file.name));
+originalImage = image;
 Rectangle = imread(fullfile(file_rectangle, [image_name '.bmp']));
 masque = (Rectangle==128);
 [M,N,~] = size(masque);
@@ -34,10 +38,10 @@ masque = (Rectangle==128);
 % de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
 probabilitesParPixel = [objProbabilitees(:), bkgProbabilitees(:)]';
 
-figure(1)
-imshow(objProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilite) que le pixel apartienne e l''avant-plan')
-figure(2)
-imshow(bkgProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilite) que le pixel apartienne e l''arriere-plan')
+% figure(1)
+% imshow(objProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilite) que le pixel apartienne e l''avant-plan')
+% figure(2)
+% imshow(bkgProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilite) que le pixel apartienne e l''arriere-plan')
 
 %% Initialisation de la librarie de coupe de graph
 % 1) on definit les parmetres de regularisation
@@ -61,8 +65,26 @@ BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grab
 clear BKhandle;
 
 %% Affichage de la solution
-figure; imagesc(image); axis image; axis off; hold on;
+% figure; imagesc(image); axis image; axis off; hold on;
+% [c,h] = contour(L, 'LineWidth',3,'Color', 'r');
+% title(sprintf('Solution du GrabCut - energie = %.2f',E)) % note: on cherche e minimiser l'energie
+
+% ==============================================
+subplot(2,2,1)
+imshow(objProbabilitees,[]), colormap('jet'), colorbar
+title('-log(prob) que le pixel apartienne avant-plan')
+%
+subplot(2,2,2)
+imshow(bkgProbabilitees,[]), colormap('jet'), colorbar
+title('-log(prob) que le pixel apartienne arriere-plan')
+% 
+subplot(2,2,3)
+imshow(originalImage)
+title('Original Image')
+% 
+subplot(2,2,4)
+imagesc(image); axis image; axis off; hold on;
 [c,h] = contour(L, 'LineWidth',3,'Color', 'r');
-title(sprintf('Solution du GrabCut - energie = %.2f',E)) % note: on cherche e minimiser l'energie
+title(sprintf('SolutionGrabCub E = %.2f',E)) % note: on cherche e minimiser l'energie
 
 
