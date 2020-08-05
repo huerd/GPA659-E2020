@@ -11,58 +11,58 @@ image_set = {'38801G','banana1','banana2','banana3','book','bool','bush','cerami
     'tennis','21077','24077','37073','65019','69020','86016','106024','124080','153077',...
     '153093','181079','189080','208001','209070','227092','271008','304074','326038','376043'};
 
-%% Quelques paramètres...
+%% Quelques parametres...
 file_image='Images'; % dossier contenant les images
 file_rectangle='Rectangle'; % dossier contenant les rectangles (segmentation initiale approximative)
 file_GT='GT'; % dossier contenant le ground truth.
 
-lambda=5; % le lamda pour le criète de régularisation, essayez lambda = 0, 5, 25, 50, 100, ...
+lambda=5; % le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
 
 %% Chargement de l'image, initialisation et affichage
-image_name=image_set{im_number};
+image_name = image_set{im_number};
 img_file = dir(fullfile(file_image, [image_name '.*']));
-groundTruth=imread(fullfile(file_GT, [image_name '.bmp']));
-image=imread(fullfile(file_image, img_file.name));
-Rectangle=imread(fullfile(file_rectangle, [image_name '.bmp']));
+groundTruth = imread(fullfile(file_GT, [image_name '.bmp']));
+image = imread(fullfile(file_image, img_file.name));
+Rectangle = imread(fullfile(file_rectangle, [image_name '.bmp']));
 masque = (Rectangle==128);
 [M,N,~] = size(masque);
 
-%% Calcul des histogrammes permetttant d'estimer la probabilité qu'un pixel appartienne à l'avant-plan et l'arrière-plan
+%% Calcul des histogrammes permetttant d'estimer la probabilite qu'un pixel appartienne e l'avant-plan et l'arriere-plan
 [objProbabilitees, bkgProbabilitees] = calculerProbabilitesParPixel(image, masque);
-% le format suivant est nécessaire pour la fonction de coupe de graphe:
-% elle ne sait sait pas qu'il s'agit d'une image, elle opère sur des noeuds
-% de graphe. La connectivité de ces noeuds est définie à l'étape suivante.
+% le format suivant est necessaire pour la fonction de coupe de graphe:
+% elle ne sait sait pas qu'il s'agit d'une image, elle opere sur des noeuds
+% de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
 probabilitesParPixel = [objProbabilitees(:), bkgProbabilitees(:)]';
 
 figure(1)
-imshow(objProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilité) que le pixel apartienne à l''avant-plan')
+imshow(objProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilite) que le pixel apartienne e l''avant-plan')
 figure(2)
-imshow(bkgProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilité) que le pixel apartienne à l''arrière-plan')
+imshow(bkgProbabilitees,[]), colormap('jet'), colorbar, title('-log(probabilite) que le pixel apartienne e l''arriere-plan')
 
 %% Initialisation de la librarie de coupe de graph
-% 1) on définit les parmètres de régularisation
+% 1) on definit les parmetres de regularisation
 optimizationOptions.NEIGHBORHOOD_TYPE = 8;
 optimizationOptions.LAMBDA_POTTS = lambda;
-% la fonction computeNeighborhoodBeta permet de générer une structure qui représente la
-% connectivité de noeuds dans notre graphe en selon la logique de voisinage dans le contexte d'une image.
+% la fonction computeNeighborhoodBeta permet de generer une structure qui represente la
+% connectivite de noeuds dans notre graphe en selon la logique de voisinage dans le contexte d'une image.
 optimizationOptions.neighborhoodBeta = computeNeighborhoodBeta(image, optimizationOptions);
 [neighborhoodWeights,~,~] = getNeighborhoodWeights_radius(image, optimizationOptions);
-% 2) on crée un objet grabcut (objet C++)
-BKhandle = BK_Create(numel(masque)); % important: créer un nouvel objet grabcut avant chaque utilisation.
+% 2) on cree un objet grabcut (objet C++)
+BKhandle = BK_Create(numel(masque)); % important: creer un nouvel objet grabcut avant chaque utilisation.
 BK_SetNeighbors(BKhandle, neighborhoodWeights);
 
 % 3) on applique la coupure de graph
 [L, ~] = optimizeWithBK(BKhandle, M, N, probabilitesParPixel);
 
-% 4) (optionel) évaluer la fonction de coût de la solution retenue: l'énergie
+% 4) (optionel) evaluer la fonction de coet de la solution retenue: l'energie
 E = computeEnergy(neighborhoodWeights, double(L==1), objProbabilitees, bkgProbabilitees);
 % 5) supression de l'objet de coupe de graphe
-BK_Delete(BKhandle); % toujours appeler ceci à chaque fois qu'on utilise le grabcut.
+BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grabcut.
 clear BKhandle;
 
 %% Affichage de la solution
 figure; imagesc(image); axis image; axis off; hold on;
 [c,h] = contour(L, 'LineWidth',3,'Color', 'r');
-title(sprintf('Solution du GrabCut - Énergie = %.2f',E)) % note: on cherche à minimiser l'énergie
+title(sprintf('Solution du GrabCut - energie = %.2f',E)) % note: on cherche e minimiser l'energie
 
 
