@@ -110,25 +110,33 @@ while running
         % 5) supression de l'objet de coupe de graphe
         BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grabcut.
         clear BKhandle;
-    end
+    end %% ----------------------- COMPLETE ITERATIONS
     
     % user prompt 
     figureRect = figure('Position', [350, 350, 900, 900]);
     imagesc(image); axis image; axis off; hold on;
-    [c,h] = contour(L, 'LineWidth',3,'Color', 'r');
+    [c,h] = contour(L, 'LineWidth',3,'Color', 'y');
     title('Resultat Courant');
     
-    str = input('Dessigne Constraintes avant-plan? ( [oui] seulement, autres entrees pour finaliser ) : ','s')
+    % str = input('Dessigne Constraintes avant-plan? ( [oui] seulement, autres entrees pour finaliser ) : ','s');
+    % just for us to avoid debugging
+    str = questdlg('Ajouter Rect Contrainte?','Resultats','oui','non', 'oui');
     close(figureRect)
 
     if strcmp(str, 'oui')
         %% TODO draw rect process
-        figureRect = figure('Position', [50, 50, 900, 900]);
+        figureRect = figure('Position', [850, 450, 900, 900]);
         imagesc(image); axis image; axis off; hold on;
-        [c,h] = contour(L, 'LineWidth',3,'Color', 'r');
+        [c,h] = contour(L, 'LineWidth',3,'Color', 'g');
         title('Dessigne Contrainte');
+        % rect =  [xmin ymin width height]. 
         rect = getrect(figureRect)
         close(figureRect)
+        
+        % create additive mask
+        
+        % OR additive mask to current mask
+
     else
         running = false
     end
