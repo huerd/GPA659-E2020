@@ -17,10 +17,10 @@ file_GT='GT'; % dossier contenant le ground truth.
 
 %% Variables qu'on peut modifier
 % Il y a 50 images dans le fichier, vous pouvez choisir un nombre entre 1 et 50
-im_number = 13; %moon
-% im_number = 15; %llama
+% im_number = 13; %moon
+im_number = 15; %llama
 % le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
-lambda = 50; 
+lambda = 5; 
 
 %% Chargement de l'image, initialisation et affichage
 image_name = image_set{im_number};
@@ -31,12 +31,18 @@ originalImage = image;
 Rectangle = imread(fullfile(file_rectangle, [image_name '.bmp']));
 masque = (Rectangle==128);
 [M,N,~] = size(masque);
-iterations = 1;
+iterations = 20;
 
 for currentIteration=1:iterations
     %% Calcul des histogrammes permetttant d'estimer la probabilite qu'un pixel appartienne e l'avant-plan et l'arriere-plan
     [objProbabilitees, bkgProbabilitees] = calculerProbabilitesParPixel(image, masque);
-    masque = objProbabilitees;
+    % UPDATE MASK where object prob is higher
+    masque = objProbabilitees > bkgProbabilitees;
+    
+    if currentIteration == 1
+        masqueInitial = masque;
+    end
+    
     % le format suivant est necessaire pour la fonction de coupe de graphe:
     % elle ne sait sait pas qu'il s'agit d'une image, elle opere sur des noeuds
     % de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
@@ -71,21 +77,32 @@ end
 % plot positioning
 figure1=figure('Position', [1500, 100, 1024, 1200]);
 
-subplot(2,2,1)
+subplot(3,2,1)
 imshow(objProbabilitees,[]), colormap('jet'), colorbar
 title('-log(prob) que le pixel apartienne avant-plan')
 %
-subplot(2,2,2)
+subplot(3,2,2)
 imshow(bkgProbabilitees,[]), colormap('jet'), colorbar
 title('-log(prob) que le pixel apartienne arriere-plan')
 % 
-subplot(2,2,3)
+subplot(3,2,3)
 imshow(originalImage)
 title('Original Image')
 % 
-subplot(2,2,4)
+subplot(3,2,4)
 imagesc(image); axis image; axis off; hold on;
 [c,h] = contour(L, 'LineWidth',3,'Color', 'r');
 title(sprintf('SolutionGrabCub E = %.2f',E)) % note: on cherche e minimiser l'energie
+% 
+subplot(3,2,5)
+imshow(masqueInitial)
+title('Initial Mask')
+title(sprintf('Initial Mask on 1st iteration'))
+% 
+subplot(3,2,6)
+imshow(masque)
+title(sprintf('Final Mask after [%d] iterations', iterations))
+
+% figure(2), imshow(masque)
 
 

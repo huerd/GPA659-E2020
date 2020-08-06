@@ -53,10 +53,10 @@ for x=1:M
     end
 end
 
-sumBkgHist = sum(bkgHist(:))
-sumObjHist = sum(objHist(:))
-totalSum = sumBkgHist + sumObjHist
-totalArea = M*N
+sumBkgHist = sum(bkgHist(:));
+sumObjHist = sum(objHist(:));
+totalSum = sumBkgHist + sumObjHist;
+totalArea = M*N;
 assert(isequal(totalSum, totalArea),'Les histogrammes n''ont pas correctement compter tous les pixels')
 
 % les histogrames sont normalises pour former une fonction de densite de probabilite
