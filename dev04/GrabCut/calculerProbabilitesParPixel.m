@@ -50,21 +50,21 @@ totalArea = M*N
 assert(isequal(totalSum, totalArea),'Les histogrammes n''ont pas correctement compter tous les pixels')
 
 % les histogrames sont normalises pour former une fonction de densite de probabilite
-objPDF = objHist ./ sum(masque(:));
-bkgPDF = bkgHist ./ sum(~masque(:));
+objPDF = objHist ./ sum(objHist(:));
+bkgPDF = bkgHist ./ sum(bkgHist(:));
 
 % on remplace les 0 par de toutes petites valeurs: rien ne devrait etre impossible!
 histAlpha = 1e-6; % la probabilite minimale dans chaque classe de la fonction de densite de probabilites
-objPDF = (1-histAlpha) * objPDF + histAlpha/(Nbins);
-bkgPDF = (1-histAlpha) * bkgPDF + histAlpha/(Nbins);
+objPDF = (1-histAlpha) .* objPDF + histAlpha/(Nbins);
+bkgPDF = (1-histAlpha) .* bkgPDF + histAlpha/(Nbins);
 
 
 % mapping entre les pixels et les classes de l'histogramme
 sizeObjPDF = size(objPDF);
 
-R = ceil(Nbins*(image(:,:,1)-1)/255 + 1);
-G = ceil(Nbins*(image(:,:,2)-1)/255 + 1);
-B = ceil(Nbins*(image(:,:,3)-1)/255 + 1);
+R = ceil((Nbins-1)*(image(:,:,1)-1)/255 + 1);
+G = ceil((Nbins-1)*(image(:,:,2)-1)/255 + 1);
+B = ceil((Nbins-1)*(image(:,:,3)-1)/255 + 1);
 
 idx = sub2ind(sizeObjPDF,R(:),G(:),B(:));
 

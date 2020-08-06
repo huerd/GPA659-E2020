@@ -20,7 +20,7 @@ file_GT='GT'; % dossier contenant le ground truth.
 % im_number = 13; %moon
 im_number = 15; %llama
 % le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
-lambda = 5; 
+lambda = 50; 
 
 %% Chargement de l'image, initialisation et affichage
 image_name = image_set{im_number};
