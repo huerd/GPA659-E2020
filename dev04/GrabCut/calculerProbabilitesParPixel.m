@@ -58,16 +58,26 @@ histAlpha = 1e-6; % la probabilite minimale dans chaque classe de la fonction de
 objPDF = (1-histAlpha) * objPDF + histAlpha/(Nbins);
 bkgPDF = (1-histAlpha) * bkgPDF + histAlpha/(Nbins);
 
+
 % mapping entre les pixels et les classes de l'histogramme
-id = ceil(image .* (Nbins-1)) + 1;
-idx = sub2ind(size(objPDF),id(:));
+sizeObjPDF = size(objPDF);
+
+R = ceil(Nbins*(image(:,:,1)-1)/255 + 1);
+G = ceil(Nbins*(image(:,:,2)-1)/255 + 1);
+B = ceil(Nbins*(image(:,:,3)-1)/255 + 1);
+
+idx = sub2ind(sizeObjPDF,R(:),G(:),B(:));
+
+% id = ceil(image .* (Nbins-1)) + 1;
+% idx = sub2ind(sizeObjPDF,id(:),id(:),id(:));
+
 
 objProb = objPDF(idx);
 bkgProb = bkgPDF(idx);
 
 % Calcul des termes de regions pour chaque pixel
-objProbabilitees = -log(reshape(objProb,M,N,O));
-bkgProbabilitees = -log(reshape(bkgProb,M,N,O));
+objProbabilitees = -log(reshape(objProb,M,N));
+bkgProbabilitees = -log(reshape(bkgProb,M,N));
 
 % optionellement: penaliser les bordures pour qu'elles soient arriere-plan
 % w = max(max(objPDF(:)),max(bkgPDF(:)));
