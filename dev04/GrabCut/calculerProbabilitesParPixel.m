@@ -8,7 +8,7 @@ end
 
 % normalisation des valeurs entre 0 et 1.0
 if(max(image(:)) > 1.0)
-    image = double(image) ./ 255;
+    image = double(image);
 end
 
 % parametre
@@ -39,9 +39,9 @@ for x=1:M
         b = image(x,y,3);
         
         % get 3d coordinates relative to our 64x64 histogram (rounded)
-        idR = ceil((Nbins-1)*r + 1);
-        idG = ceil((Nbins-1)*g + 1);
-        idB = ceil((Nbins-1)*b + 1);
+        idR = ceil((Nbins-1)*r/255 + 1);
+        idG = ceil((Nbins-1)*g/255 + 1);
+        idB = ceil((Nbins-1)*b/255 + 1);
 
         if masque(x,y)
             % objHist(id) = objHist(id) + 1;
@@ -72,9 +72,9 @@ bkgPDF = (1-histAlpha) .* bkgPDF + histAlpha/(Nbins);
 % mapping entre les pixels et les classes de l'histogramme
 sizeObjPDF = size(objPDF);
 
-R = ceil((Nbins-1)*(image(:,:,1)-1) + 1);
-G = ceil((Nbins-1)*(image(:,:,2)-1) + 1);
-B = ceil((Nbins-1)*(image(:,:,3)-1) + 1);
+R = ceil((Nbins-1)*(image(:,:,1)-1)/255 + 1);
+G = ceil((Nbins-1)*(image(:,:,2)-1)/255 + 1);
+B = ceil((Nbins-1)*(image(:,:,3)-1)/255 + 1);
 
 linearR = R(:);
 linearG = G(:);
