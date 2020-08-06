@@ -43,7 +43,7 @@ for x=1:M
         idG = ceil((Nbins-1)*g/255 + 1);
         idB = ceil((Nbins-1)*b/255 + 1);
 
-        if masque(x,y)
+        if masque(x,y) == 1
             % objHist(id) = objHist(id) + 1;
             objHist(idR, idG, idB) = objHist(idR, idG, idB) + 1;
         else

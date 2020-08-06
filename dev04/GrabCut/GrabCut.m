@@ -20,7 +20,7 @@ file_GT='GT'; % dossier contenant le ground truth.
 % im_number = 13; %moon
 im_number = 15; %llama
 % le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
-lambda = 5; 
+lambda = 20; 
 
 %% Chargement de l'image, initialisation et affichage
 image_name = image_set{im_number};
@@ -31,21 +31,26 @@ originalImage = image;
 Rectangle = imread(fullfile(file_rectangle, [image_name '.bmp']));
 masque = (Rectangle==128);
 [M,N,~] = size(masque);
-iterations = 20;
+iterations = 3;
+
+% we'll only store 10 masks
+n = 10 ;
+storedMask = cell(n, 1) ;
+% store our first mask (should be a rect)
+storedMask{1} = masque;
+bestEnergy = 0;
 
 for currentIteration=1:iterations
+
+    
     %% Calcul des histogrammes permetttant d'estimer la probabilite qu'un pixel appartienne e l'avant-plan et l'arriere-plan
+    % i guess masque = the S in the equation, omega is image
     [objProbabilitees, bkgProbabilitees] = calculerProbabilitesParPixel(image, masque);
-    % UPDATE MASK where object prob is higher
-    masque = objProbabilitees > bkgProbabilitees;
-    
-    if currentIteration == 1
-        masqueInitial = masque;
-    end
-    
+
     % le format suivant est necessaire pour la fonction de coupe de graphe:
     % elle ne sait sait pas qu'il s'agit d'une image, elle opere sur des noeuds
     % de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
+    
     probabilitesParPixel = [objProbabilitees(:), bkgProbabilitees(:)]';
 
     %% Initialisation de la librarie de coupe de graph
@@ -64,26 +69,62 @@ for currentIteration=1:iterations
     [L, ~] = optimizeWithBK(BKhandle, M, N, probabilitesParPixel);
 
     % 4) (optionel) evaluer la fonction de coet de la solution retenue: l'energie
+    % higher E is better segmentation
     E = computeEnergy(neighborhoodWeights, double(L==1), objProbabilitees, bkgProbabilitees);
+    
+    % store the first segmentation Energy on first iteration, otherwise we
+    % compare
+    if currentIteration == 1
+        sprintf('1st Iteration E is [%d] ', E)
+        cropSize = sum(masque(:))
+        previousEnergy = E;
+    else
+        if E > previousEnergy
+            % store the as masque? 
+%             masque = ~(L > ones(M,N));
+            sprintf('New best E is [%d] at %d iteration', E, currentIteration)
+            previousEnergy = E
+        end
+    end
+    
+    % save current E for next loop
+    previousEnergy = E;
+    
+    % update our mask with current cut
+    masque = and(masque,~(L > ones(M,N)));
+    
+    
+    %% TODO avec notre masque finale, comparer le avec le masque de GT et
+    % output Dice index : https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
+    
+    
+    %% debug outputs
+    % store masks after 1 iteration
+    if currentIteration > 1
+        storedMask{currentIteration} = masque;
+    end
+    % sum of all white space. less is better
+    cropSize = sum(masque(:));
     % 5) supression de l'objet de coupe de graphe
     BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grabcut.
     clear BKhandle;
 end
 
+cropSize = sum(masque(:))
 
 
 %% Affichage de la solution
 % ==============================================
 % plot positioning
-figure1=figure('Position', [1500, 100, 1024, 1200]);
+figure1 = figure('Position', [1500, 100, 1024, 1200]);
 
 subplot(3,2,1)
 imshow(objProbabilitees,[]), colormap('jet'), colorbar
-title('-log(prob) que le pixel apartienne avant-plan')
+title('-log(prob) que le pixel apartienne avant-plan ()')
 %
 subplot(3,2,2)
 imshow(bkgProbabilitees,[]), colormap('jet'), colorbar
-title('-log(prob) que le pixel apartienne arriere-plan')
+title('-log(prob) que le pixel apartienne arriere-plan ()')
 % 
 subplot(3,2,3)
 imshow(originalImage)
@@ -92,10 +133,10 @@ title('Original Image')
 subplot(3,2,4)
 imagesc(image); axis image; axis off; hold on;
 [c,h] = contour(L, 'LineWidth',3,'Color', 'r');
-title(sprintf('SolutionGrabCub E = %.2f',E)) % note: on cherche e minimiser l'energie
+title(sprintf('SolutionGrabCut E = %.2f',E)) % note: on cherche e minimiser l'energie
 % 
 subplot(3,2,5)
-imshow(masqueInitial)
+imshow(storedMask{1})
 title('Initial Mask')
 title(sprintf('Initial Mask on 1st iteration'))
 % 
@@ -103,6 +144,12 @@ subplot(3,2,6)
 imshow(masque)
 title(sprintf('Final Mask after [%d] iterations', iterations))
 
-% figure(2), imshow(masque)
 
-
+% plots only the first 10 masks
+figure2 = figure('Position', [50, 1200, 1900, 250]);
+%
+for plotter = 1:n
+    subplot(1,n,plotter)
+    imshow(storedMask{plotter})
+    title(sprintf('[%d] iter', plotter))
+end
