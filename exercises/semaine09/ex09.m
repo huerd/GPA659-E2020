@@ -1,3 +1,7 @@
+clear;
+close('all');
+clc;
+
 image = imread('peppers.png');
 figure(1), imshow(image);
 doubleImage = double(image);
@@ -51,9 +55,35 @@ figure(2), scatter3(X(:), Y(:), Z(:), S(:), C,'filled')
 % normalize histogram for probability density
 PDF = histogramme3d ./ sum(histogramme3d(:));
 
-idx = sub2ind(size(PDF),X(:),Y(:),Z(:));
+% R = histogramme3d(:,:,1);
+% G = histogramme3d(:,:,2);
+% B = histogramme3d(:,:,3);
+% [redSize, greenSize, blueSize] = size(histogramme3d);
+
+% R = zeros(redSize,1);
+% G = zeros(greenSize,1);
+% B = zeros(blueSize,1);
+
+% for r = 1:redSize
+%     for g = 1:greenSize
+%         for b = 1:blueSize
+
+%         end
+%     end
+% end
+
+% % 
+sizePDF = size(PDF)
+R = ceil(63*(doubleImage(:,:,1)-1)/255 + 1);
+G = ceil(63*(doubleImage(:,:,2)-1)/255 + 1);
+B = ceil(63*(doubleImage(:,:,3)-1)/255 + 1);
+% Rlin = R(:);
+idx = sub2ind(sizePDF,R(:),G(:),B(:));
 prob = PDF(idx);
-figure(3), plotmatrix(prob, idx);
+[m,n,~] = size(doubleImage);
+reshapePlot = reshape(prob,m,n);
+figure(3), imshow(reshapePlot,[]);
+% figure(3), plotmatrix(prob, idx);
 % figure(3), imshow(reshape(prob, size(idx)));
 
 % 
