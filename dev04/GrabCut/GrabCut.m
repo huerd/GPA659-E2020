@@ -20,7 +20,7 @@ file_GT='GT'; % dossier contenant le ground truth.
 % im_number = 13; %moon
 im_number = 15; %llama
 % le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
-lambda = 20; 
+lambda = 5; 
 
 %% Chargement de l'image, initialisation et affichage
 image_name = image_set{im_number};
@@ -31,15 +31,17 @@ originalImage = image;
 Rectangle = imread(fullfile(file_rectangle, [image_name '.bmp']));
 masque = (Rectangle==128);
 [M,N,~] = size(masque);
-iterations = 3;
+iterations = 2;
 
 % we'll only store 10 masks
 n = 10 ;
 storedMask = cell(n, 1) ;
 % store our first mask (should be a rect)
 storedMask{1} = masque;
+timesDrawn = 0;
 bestEnergy = 0;
-running = true
+running = true;
+oneSeriesCompleted = false;
 
 while running
     for currentIteration=1:iterations
@@ -79,6 +81,8 @@ while running
             cropSize = sum(masque(:))
             previousEnergy = E;
         else
+            % force probabilities
+            
             if E > previousEnergy
                 % store the as masque? 
     %             masque = ~(L > ones(M,N));
@@ -86,21 +90,13 @@ while running
                 previousEnergy = E
             end
         end
-    
-        
-        
+ 
         % save current E for next loop
         previousEnergy = E;
         
         % update our mask with current cut
         masque = and(masque,~(L > ones(M,N)));
-        
-        
-        
-        
-    
-        
-        
+
         % store masks after 1 iteration
         if currentIteration > 1
             storedMask{currentIteration} = masque;
@@ -112,42 +108,89 @@ while running
         clear BKhandle;
     end %% ----------------------- COMPLETE ITERATIONS
     
+    oneSeriesCompleted = true;
+    
     % user prompt 
-    figureRect = figure('Position', [350, 350, 900, 900]);
+    figureRect = figure('Position', [350, 350, 900, 900], 'Name', 'CurrentResult');
     imagesc(image); axis image; axis off; hold on;
     [c,h] = contour(L, 'LineWidth',3,'Color', 'y');
     title('Resultat Courant');
     
-    % str = input('Dessigne Constraintes avant-plan? ( [oui] seulement, autres entrees pour finaliser ) : ','s');
-    % just for us to avoid debugging
-    str = questdlg('Ajouter Rect Contrainte?','Resultats','oui','non', 'oui');
-    close(figureRect)
+    for prompt = 1:2
+        if prompt == 1
+            str = questdlg('Ajouter Rect Contrainte avant-plan?','Resultats','oui','non', 'oui');
+        else
+            str = questdlg('Ajouter Rect Contrainte arriere-plan?','Resultats','oui','non', 'oui');
+        end
 
-    if strcmp(str, 'oui')
-        %% TODO draw rect process
-        figureRect = figure('Position', [850, 450, 900, 900]);
-        imagesc(image); axis image; axis off; hold on;
-        [c,h] = contour(L, 'LineWidth',3,'Color', 'g');
-        title('Dessigne Contrainte');
-        % rect =  [xmin ymin width height]. 
-        rect = getrect(figureRect)
-        close(figureRect)
-        
-        % create additive mask
-        
-        % OR additive mask to current mask
+        % str = input('Dessigne Constraintes avant-plan? ( [oui] seulement, autres entrees pour finaliser ) : ','s');
+        % just for us to avoid debugging
+        close(findobj('type','figure','name','Filters'))
+        close(findobj('type','figure','name','CurrentResult'))
 
-    else
-        running = false
+        if strcmp(str, 'oui')
+            %% TODO draw rect process
+            figureRect = figure('Position', [850, 450, 900, 900]);
+            imagesc(image); axis image; axis off; hold on;
+            [c,h] = contour(L, 'LineWidth',3,'Color', 'g');
+            title('Dessigne Contrainte');
+            % rect =  [xmin ymin width height]. 
+            rect = getrect(figureRect)
+            timesDrawn = timesDrawn + 1;
+            close(figureRect)
+
+            % round the values
+            x1 = floor(rect(1));
+            y1 = floor(rect(2));
+            x2 = x1 + floor(rect(3));
+            y2 = y1 + floor(rect(4));
+            
+            % create additive mask
+            additiveMask = ones(y2 - y1,x2 - x1);
+
+            % x2 = x + size(additiveMask,1) - 1;
+            % y2 = y + size(additiveMask,2) - 1;
+            drawnMask = zeros(M,N);
+            drawnMask(y1 : y2 -1, x1 : x2-1) = additiveMask;
+            
+            previousMask = masque;
+            combined = and(previousMask, ~drawnMask);
+
+            masque = combined;
+
+            figureMask = figure('Position', [1500, 650, 1024, 350], 'Name', 'Filters');
+            subplot(1,3,1)
+            imshow(drawnMask);
+            title('loadingMask');
+            %
+            subplot(1,3,2)
+            imshow(previousMask);
+            title('previousMask');
+            %
+            subplot(1,3,3)
+            imshow(combined);
+            title('combined masque');
+            
+            % 
+    %         masque = or(masque, combinedMask);
+    %         masque(x : x2, y : y2) = additiveMask;
+            % OR additive mask to current mask
+
+        else
+            running = false
+            close(findobj('type','figure','name','Filters'))
+        end
     end
+    
     
 end
 
+cropSize = sum(masque(:))
 
 %% TODO avec notre masque finale, comparer le avec le masque de GT et
 % output Dice index : https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
 
-cropSize = sum(masque(:))
+
 
 
 %% Affichage de la solution
@@ -182,7 +225,7 @@ imshow(masque)
 title(sprintf('Final Mask after [%d] iterations', iterations))
 
 % plots only the first 10 masks
-figure2 = figure('Position', [50, 1200, 1900, 250]);
+figure2 = figure('Position', [50, 1200, 1900, 250],'Name', 'Iteration Masks');
 %
 for plotter = 1:n
     subplot(1,n,plotter)
