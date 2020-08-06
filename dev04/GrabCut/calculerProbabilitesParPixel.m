@@ -28,10 +28,20 @@ bkgHist = zeros(Nbins,Nbins,Nbins);
 for x=1:M
     for y=1:N
         % id = ceil(image(x,y) * (Nbins-1)) + 1;
-
-        idR = ceil(image(x,y,1) * (Nbins-1)) + 1;
-        idG = ceil(image(x,y,2) * (Nbins-1)) + 1;
-        idB = ceil(image(x,y,3) * (Nbins-1)) + 1;
+% 
+%         idR = ceil(image(x,y,1) * (Nbins-1)) + 1;
+%         idG = ceil(image(x,y,2) * (Nbins-1)) + 1;
+%         idB = ceil(image(x,y,3) * (Nbins-1)) + 1;
+        
+        % extract values from each color channel
+        r = image(x,y,1);
+        g = image(x,y,2);
+        b = image(x,y,3);
+        
+        % get 3d coordinates relative to our 64x64 histogram (rounded)
+        idR = ceil((Nbins-1)*r + 1);
+        idG = ceil((Nbins-1)*g + 1);
+        idB = ceil((Nbins-1)*b + 1);
 
         if masque(x,y)
             % objHist(id) = objHist(id) + 1;
@@ -62,11 +72,15 @@ bkgPDF = (1-histAlpha) .* bkgPDF + histAlpha/(Nbins);
 % mapping entre les pixels et les classes de l'histogramme
 sizeObjPDF = size(objPDF);
 
-R = ceil((Nbins-1)*(image(:,:,1)-1)/255 + 1);
-G = ceil((Nbins-1)*(image(:,:,2)-1)/255 + 1);
-B = ceil((Nbins-1)*(image(:,:,3)-1)/255 + 1);
+R = ceil((Nbins-1)*(image(:,:,1)-1) + 1);
+G = ceil((Nbins-1)*(image(:,:,2)-1) + 1);
+B = ceil((Nbins-1)*(image(:,:,3)-1) + 1);
 
-idx = sub2ind(sizeObjPDF,R(:),G(:),B(:));
+linearR = R(:);
+linearG = G(:);
+linearB = B(:);
+
+idx = sub2ind(sizeObjPDF, R(:), G(:), B(:));
 
 % id = ceil(image .* (Nbins-1)) + 1;
 % idx = sub2ind(sizeObjPDF,id(:),id(:),id(:));
