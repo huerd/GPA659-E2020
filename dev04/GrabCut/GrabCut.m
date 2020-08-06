@@ -18,9 +18,10 @@ file_GT='GT'; % dossier contenant le ground truth.
 %% Variables qu'on peut modifier
 % Il y a 50 images dans le fichier, vous pouvez choisir un nombre entre 1 et 50
 % im_number = 13; %moon
-im_number = 15; %llama
+% im_number = 15; %llama
+im_number = randi([1 50]); %fish
 % le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
-lambda = 5; 
+lambda = 50; 
 
 %% Chargement de l'image, initialisation et affichage
 image_name = image_set{im_number};
@@ -31,7 +32,8 @@ originalImage = image;
 Rectangle = imread(fullfile(file_rectangle, [image_name '.bmp']));
 masque = (Rectangle==128);
 [M,N,~] = size(masque);
-iterations = 2;
+
+iterations = 10;
 
 % we'll only store 10 masks
 n = 10 ;
@@ -40,149 +42,104 @@ storedMask = cell(n, 1) ;
 storedMask{1} = masque;
 timesDrawn = 0;
 bestEnergy = 0;
+prompted = false;
+avantPlan = zeros(M,N);
+arrierePlan = zeros(M,N);
 running = true;
-oneSeriesCompleted = false;
 
 while running
     for currentIteration=1:iterations
-        %% Calcul des histogrammes permetttant d'estimer la probabilite qu'un pixel appartienne e l'avant-plan et l'arriere-plan
-        % i guess masque = the S in the equation, omega is image
         [objProbabilitees, bkgProbabilitees] = calculerProbabilitesParPixel(image, masque);
+
+        % apply drawn masks to probabilities
+        if prompted == true
+            % make it the last series iteration
+            running = false;
+            % save the previous mask
+            previousMask = masque;
+            
+            avantPlan = avantPlan .*99999;
+            bkgProbabilitees = bkgProbabilitees + avantPlan;
+            
+            arrierePlan = arrierePlan .*99999;
+            objProbabilitees = objProbabilitees + arrierePlan;
+        end
     
-        % le format suivant est necessaire pour la fonction de coupe de graphe:
-        % elle ne sait sait pas qu'il s'agit d'une image, elle opere sur des noeuds
-        % de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
-        
         probabilitesParPixel = [objProbabilitees(:), bkgProbabilitees(:)]';
     
-        %% Initialisation de la librarie de coupe de graph
-        % 1) on definit les parmetres de regularisation
         optimizationOptions.NEIGHBORHOOD_TYPE = 8;
         optimizationOptions.LAMBDA_POTTS = lambda;
-        % la fonction computeNeighborhoodBeta permet de generer une structure qui represente la
-        % connectivite de noeuds dans notre graphe en selon la logique de voisinage dans le contexte d'une image.
         optimizationOptions.neighborhoodBeta = computeNeighborhoodBeta(image, optimizationOptions);
         [neighborhoodWeights,~,~] = getNeighborhoodWeights_radius(image, optimizationOptions);
-        % 2) on cree un objet grabcut (objet C++)
         BKhandle = BK_Create(numel(masque)); % important: creer un nouvel objet grabcut avant chaque utilisation.
         BK_SetNeighbors(BKhandle, neighborhoodWeights);
-    
-        % 3) on applique la coupure de graph
         [L, ~] = optimizeWithBK(BKhandle, M, N, probabilitesParPixel);
-    
-        % 4) (optionel) evaluer la fonction de coet de la solution retenue: l'energie
-        % higher E is better segmentation
         E = computeEnergy(neighborhoodWeights, double(L==1), objProbabilitees, bkgProbabilitees);
         
-        % store the first segmentation Energy on first iteration, otherwise we
-        % compare
-        if currentIteration == 1
-            sprintf('1st Iteration E is [%d] ', E)
-            cropSize = sum(masque(:))
-            previousEnergy = E;
-        else
-            % force probabilities
-            
-            if E > previousEnergy
-                % store the as masque? 
-    %             masque = ~(L > ones(M,N));
-                sprintf('New best E is [%d] at %d iteration', E, currentIteration)
-                previousEnergy = E
-            end
-        end
- 
-        % save current E for next loop
-        previousEnergy = E;
-        
         % update our mask with current cut
-        masque = and(masque,~(L > ones(M,N)));
+        masque = ~(L > ones(M,N));
 
         % store masks after 1 iteration
         if currentIteration > 1
             storedMask{currentIteration} = masque;
         end
-        % sum of all white space. less is better
-        cropSize = sum(masque(:));
-        % 5) supression de l'objet de coupe de graphe
+
         BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grabcut.
         clear BKhandle;
     end %% ----------------------- COMPLETE ITERATIONS
     
-    oneSeriesCompleted = true;
-    
-    % user prompt 
-    figureRect = figure('Position', [350, 350, 900, 900], 'Name', 'CurrentResult');
-    imagesc(image); axis image; axis off; hold on;
-    [c,h] = contour(L, 'LineWidth',3,'Color', 'y');
-    title('Resultat Courant');
-    
-    for prompt = 1:2
-        if prompt == 1
-            str = questdlg('Ajouter Rect Contrainte avant-plan?','Resultats','oui','non', 'oui');
-        else
-            str = questdlg('Ajouter Rect Contrainte arriere-plan?','Resultats','oui','non', 'oui');
-        end
-
-        % str = input('Dessigne Constraintes avant-plan? ( [oui] seulement, autres entrees pour finaliser ) : ','s');
-        % just for us to avoid debugging
-        close(findobj('type','figure','name','Filters'))
-        close(findobj('type','figure','name','CurrentResult'))
-
-        if strcmp(str, 'oui')
-            %% TODO draw rect process
-            figureRect = figure('Position', [850, 450, 900, 900]);
+    if prompted == false
+        for prompt = 1:2
+            % user prompt 
+            figureRect = figure('Position', [350, 350, 900, 900], 'Name', 'CurrentResult');
             imagesc(image); axis image; axis off; hold on;
-            [c,h] = contour(L, 'LineWidth',3,'Color', 'g');
-            title('Dessigne Contrainte');
-            % rect =  [xmin ymin width height]. 
-            rect = getrect(figureRect)
-            timesDrawn = timesDrawn + 1;
-            close(figureRect)
+            [c,h] = contour(L, 'LineWidth',3,'Color', 'y');
+            title('Resultat Courant');
 
-            % round the values
-            x1 = floor(rect(1));
-            y1 = floor(rect(2));
-            x2 = x1 + floor(rect(3));
-            y2 = y1 + floor(rect(4));
-            
-            % create additive mask
-            additiveMask = ones(y2 - y1,x2 - x1);
+            if prompt == 1
+                % str = input('Dessigne Constraintes avant-plan? ( [oui] seulement, autres entrees pour finaliser ) : ','s');
+                str = questdlg('Ajouter Rect Contrainte avant-plan?','Resultats','oui','non', 'oui');
+            else
+                % str = input('Dessigne Constraintes arriere-plan? ( [oui] seulement, autres entrees pour finaliser ) : ','s');
+                str = questdlg('Ajouter Rect Contrainte arriere-plan?','Resultats','oui','non', 'oui');
+            end
 
-            % x2 = x + size(additiveMask,1) - 1;
-            % y2 = y + size(additiveMask,2) - 1;
-            drawnMask = zeros(M,N);
-            drawnMask(y1 : y2 -1, x1 : x2-1) = additiveMask;
-            
-            previousMask = masque;
-            combined = and(previousMask, ~drawnMask);
-
-            masque = combined;
-
-            figureMask = figure('Position', [1500, 650, 1024, 350], 'Name', 'Filters');
-            subplot(1,3,1)
-            imshow(drawnMask);
-            title('loadingMask');
-            %
-            subplot(1,3,2)
-            imshow(previousMask);
-            title('previousMask');
-            %
-            subplot(1,3,3)
-            imshow(combined);
-            title('combined masque');
-            
-            % 
-    %         masque = or(masque, combinedMask);
-    %         masque(x : x2, y : y2) = additiveMask;
-            % OR additive mask to current mask
-
-        else
-            running = false
             close(findobj('type','figure','name','Filters'))
+            close(findobj('type','figure','name','CurrentResult'))
+
+            if strcmp(str, 'oui')
+                figureRect = figure('Position', [850, 450, 900, 900]);
+                imagesc(image); axis image; axis off; hold on;
+                [c,h] = contour(L, 'LineWidth',3,'Color', 'g');
+                title('Dessigne Contrainte');
+                rect = getrect(figureRect)
+                timesDrawn = timesDrawn + 1;
+                close(figureRect)
+
+                % round the values
+                x1 = floor(rect(1));
+                y1 = floor(rect(2));
+                x2 = x1 + floor(rect(3));
+                y2 = y1 + floor(rect(4));
+
+                % create additive mask
+                additiveMask = ones(y2 - y1,x2 - x1);
+                drawnMask = zeros(M,N);
+                drawnMask(y1 : y2 -1, x1 : x2-1) = additiveMask;
+
+                % register masks depending on the prompt
+                if prompt == 1
+                    avantPlan = drawnMask;
+                else
+                    arrierePlan = drawnMask;
+                end
+
+            else
+                close(findobj('type','figure','name','Filters'))
+            end
         end
     end
-    
-    
+    prompted = true;
 end
 
 cropSize = sum(masque(:))
@@ -232,3 +189,12 @@ for plotter = 1:n
     imshow(storedMask{plotter})
     title(sprintf('[%d] iter', plotter))
 end
+
+figureDrawnFilters = figure('Position', [1000, 650, 1024, 350], 'Name', 'DrawnFilters');
+subplot(1,2,1)
+imshow(avantPlan);
+title('avantPlan');
+%
+subplot(1,2,2)
+imshow(arrierePlan);
+title('arrierePlan');
