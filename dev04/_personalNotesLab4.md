@@ -1,9 +1,9 @@
 - we'll be mostly working in calculerProbabilitesParPixel.m and grabcut.m
 - with grabcut, it's an iterative algo. it will check each pixel if there's a probability its in the foreground/background, based on pixel intensity and approximation of other pixels around it.
-- It'll take the intensity of the pixels of the background has a higher chance will be on the background or foreground. It does large crunch calculations.
-- the code needs to convert the image to color (he says you can just copy paste ex 9 to it)
-- when doing the loop, it'll be in grabcub.m
-- the mask in calculerProbabilitesParPixel(image, masque); of grabcut.m
+		- It'll take the intensity of the pixels of the background has a higher chance will be on the background or foreground. It does large crunch calculations.
+		- the code needs to convert the image to color (he says you can just copy paste ex 9 to it)
+		- when doing the loop, it'll be in grabcub.m
+		- the mask in calculerProbabilitesParPixel(image, masque); of grabcut.m
 - E = computeEnergy(neighborhoodWeights, double(L==1), objProbabilitees, bkgProbabilitees); 
 	- used to find if the image has changed or not
 	- E is the quantity of movement/variation intensities in the image
@@ -16,3 +16,9 @@
 	- the weights can be hardcoded like 999999
 - 7 is dice index to check if segmentation is properly done
 - verify your answers using GT folder (ground truth)
+
+# Todo list
+### Part 6
+* requires implementing the following functions for user input
+  * input() to ask yes or no
+  * getrect() to draw on the program's display

@@ -31,40 +31,37 @@ originalImage = image;
 Rectangle = imread(fullfile(file_rectangle, [image_name '.bmp']));
 masque = (Rectangle==128);
 [M,N,~] = size(masque);
-iterations = 1;
+iterations = 10;
 
-for currentIteration=1:iterations
-    %% Calcul des histogrammes permetttant d'estimer la probabilite qu'un pixel appartienne e l'avant-plan et l'arriere-plan
-    [objProbabilitees, bkgProbabilitees] = calculerProbabilitesParPixel(image, masque);
-    masque = objProbabilitees;
-    % le format suivant est necessaire pour la fonction de coupe de graphe:
-    % elle ne sait sait pas qu'il s'agit d'une image, elle opere sur des noeuds
-    % de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
-    probabilitesParPixel = [objProbabilitees(:), bkgProbabilitees(:)]';
+for currentIteration
+%% Calcul des histogrammes permetttant d'estimer la probabilite qu'un pixel appartienne e l'avant-plan et l'arriere-plan
+[objProbabilitees, bkgProbabilitees] = calculerProbabilitesParPixel(image, masque);
+masque = objProbabilitees;
+% le format suivant est necessaire pour la fonction de coupe de graphe:
+% elle ne sait sait pas qu'il s'agit d'une image, elle opere sur des noeuds
+% de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
+probabilitesParPixel = [objProbabilitees(:), bkgProbabilitees(:)]';
 
-    %% Initialisation de la librarie de coupe de graph
-    % 1) on definit les parmetres de regularisation
-    optimizationOptions.NEIGHBORHOOD_TYPE = 8;
-    optimizationOptions.LAMBDA_POTTS = lambda;
-    % la fonction computeNeighborhoodBeta permet de generer une structure qui represente la
-    % connectivite de noeuds dans notre graphe en selon la logique de voisinage dans le contexte d'une image.
-    optimizationOptions.neighborhoodBeta = computeNeighborhoodBeta(image, optimizationOptions);
-    [neighborhoodWeights,~,~] = getNeighborhoodWeights_radius(image, optimizationOptions);
-    % 2) on cree un objet grabcut (objet C++)
-    BKhandle = BK_Create(numel(masque)); % important: creer un nouvel objet grabcut avant chaque utilisation.
-    BK_SetNeighbors(BKhandle, neighborhoodWeights);
+%% Initialisation de la librarie de coupe de graph
+% 1) on definit les parmetres de regularisation
+optimizationOptions.NEIGHBORHOOD_TYPE = 8;
+optimizationOptions.LAMBDA_POTTS = lambda;
+% la fonction computeNeighborhoodBeta permet de generer une structure qui represente la
+% connectivite de noeuds dans notre graphe en selon la logique de voisinage dans le contexte d'une image.
+optimizationOptions.neighborhoodBeta = computeNeighborhoodBeta(image, optimizationOptions);
+[neighborhoodWeights,~,~] = getNeighborhoodWeights_radius(image, optimizationOptions);
+% 2) on cree un objet grabcut (objet C++)
+BKhandle = BK_Create(numel(masque)); % important: creer un nouvel objet grabcut avant chaque utilisation.
+BK_SetNeighbors(BKhandle, neighborhoodWeights);
 
-    % 3) on applique la coupure de graph
-    [L, ~] = optimizeWithBK(BKhandle, M, N, probabilitesParPixel);
+% 3) on applique la coupure de graph
+[L, ~] = optimizeWithBK(BKhandle, M, N, probabilitesParPixel);
 
-    % 4) (optionel) evaluer la fonction de coet de la solution retenue: l'energie
-    E = computeEnergy(neighborhoodWeights, double(L==1), objProbabilitees, bkgProbabilitees);
-    % 5) supression de l'objet de coupe de graphe
-    BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grabcut.
-    clear BKhandle;
-end
-
-
+% 4) (optionel) evaluer la fonction de coet de la solution retenue: l'energie
+E = computeEnergy(neighborhoodWeights, double(L==1), objProbabilitees, bkgProbabilitees);
+% 5) supression de l'objet de coupe de graphe
+BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grabcut.
+clear BKhandle;
 
 %% Affichage de la solution
 % ==============================================
