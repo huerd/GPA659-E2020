@@ -39,76 +39,113 @@ storedMask = cell(n, 1) ;
 % store our first mask (should be a rect)
 storedMask{1} = masque;
 bestEnergy = 0;
+running = true
 
-for currentIteration=1:iterations
-
+while running
+    for currentIteration=1:iterations
+        %% Calcul des histogrammes permetttant d'estimer la probabilite qu'un pixel appartienne e l'avant-plan et l'arriere-plan
+        % i guess masque = the S in the equation, omega is image
+        [objProbabilitees, bkgProbabilitees] = calculerProbabilitesParPixel(image, masque);
     
-    %% Calcul des histogrammes permetttant d'estimer la probabilite qu'un pixel appartienne e l'avant-plan et l'arriere-plan
-    % i guess masque = the S in the equation, omega is image
-    [objProbabilitees, bkgProbabilitees] = calculerProbabilitesParPixel(image, masque);
-
-    % le format suivant est necessaire pour la fonction de coupe de graphe:
-    % elle ne sait sait pas qu'il s'agit d'une image, elle opere sur des noeuds
-    % de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
+        % le format suivant est necessaire pour la fonction de coupe de graphe:
+        % elle ne sait sait pas qu'il s'agit d'une image, elle opere sur des noeuds
+        % de graphe. La connectivite de ces noeuds est definie e l'etape suivante.
+        
+        probabilitesParPixel = [objProbabilitees(:), bkgProbabilitees(:)]';
     
-    probabilitesParPixel = [objProbabilitees(:), bkgProbabilitees(:)]';
-
-    %% Initialisation de la librarie de coupe de graph
-    % 1) on definit les parmetres de regularisation
-    optimizationOptions.NEIGHBORHOOD_TYPE = 8;
-    optimizationOptions.LAMBDA_POTTS = lambda;
-    % la fonction computeNeighborhoodBeta permet de generer une structure qui represente la
-    % connectivite de noeuds dans notre graphe en selon la logique de voisinage dans le contexte d'une image.
-    optimizationOptions.neighborhoodBeta = computeNeighborhoodBeta(image, optimizationOptions);
-    [neighborhoodWeights,~,~] = getNeighborhoodWeights_radius(image, optimizationOptions);
-    % 2) on cree un objet grabcut (objet C++)
-    BKhandle = BK_Create(numel(masque)); % important: creer un nouvel objet grabcut avant chaque utilisation.
-    BK_SetNeighbors(BKhandle, neighborhoodWeights);
-
-    % 3) on applique la coupure de graph
-    [L, ~] = optimizeWithBK(BKhandle, M, N, probabilitesParPixel);
-
-    % 4) (optionel) evaluer la fonction de coet de la solution retenue: l'energie
-    % higher E is better segmentation
-    E = computeEnergy(neighborhoodWeights, double(L==1), objProbabilitees, bkgProbabilitees);
+        %% Initialisation de la librarie de coupe de graph
+        % 1) on definit les parmetres de regularisation
+        optimizationOptions.NEIGHBORHOOD_TYPE = 8;
+        optimizationOptions.LAMBDA_POTTS = lambda;
+        % la fonction computeNeighborhoodBeta permet de generer une structure qui represente la
+        % connectivite de noeuds dans notre graphe en selon la logique de voisinage dans le contexte d'une image.
+        optimizationOptions.neighborhoodBeta = computeNeighborhoodBeta(image, optimizationOptions);
+        [neighborhoodWeights,~,~] = getNeighborhoodWeights_radius(image, optimizationOptions);
+        % 2) on cree un objet grabcut (objet C++)
+        BKhandle = BK_Create(numel(masque)); % important: creer un nouvel objet grabcut avant chaque utilisation.
+        BK_SetNeighbors(BKhandle, neighborhoodWeights);
     
-    % store the first segmentation Energy on first iteration, otherwise we
-    % compare
-    if currentIteration == 1
-        sprintf('1st Iteration E is [%d] ', E)
-        cropSize = sum(masque(:))
-        previousEnergy = E;
-    else
-        if E > previousEnergy
-            % store the as masque? 
-%             masque = ~(L > ones(M,N));
-            sprintf('New best E is [%d] at %d iteration', E, currentIteration)
-            previousEnergy = E
+        % 3) on applique la coupure de graph
+        [L, ~] = optimizeWithBK(BKhandle, M, N, probabilitesParPixel);
+    
+        % 4) (optionel) evaluer la fonction de coet de la solution retenue: l'energie
+        % higher E is better segmentation
+        E = computeEnergy(neighborhoodWeights, double(L==1), objProbabilitees, bkgProbabilitees);
+        
+        % store the first segmentation Energy on first iteration, otherwise we
+        % compare
+        if currentIteration == 1
+            sprintf('1st Iteration E is [%d] ', E)
+            cropSize = sum(masque(:))
+            previousEnergy = E;
+        else
+            if E > previousEnergy
+                % store the as masque? 
+    %             masque = ~(L > ones(M,N));
+                sprintf('New best E is [%d] at %d iteration', E, currentIteration)
+                previousEnergy = E
+            end
         end
+    
+        
+        
+        % save current E for next loop
+        previousEnergy = E;
+        
+        % update our mask with current cut
+        masque = and(masque,~(L > ones(M,N)));
+        
+        
+        
+        
+    
+        
+        
+        % store masks after 1 iteration
+        if currentIteration > 1
+            storedMask{currentIteration} = masque;
+        end
+        % sum of all white space. less is better
+        cropSize = sum(masque(:));
+        % 5) supression de l'objet de coupe de graphe
+        BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grabcut.
+        clear BKhandle;
+    end %% ----------------------- COMPLETE ITERATIONS
+    
+    % user prompt 
+    figureRect = figure('Position', [350, 350, 900, 900]);
+    imagesc(image); axis image; axis off; hold on;
+    [c,h] = contour(L, 'LineWidth',3,'Color', 'y');
+    title('Resultat Courant');
+    
+    % str = input('Dessigne Constraintes avant-plan? ( [oui] seulement, autres entrees pour finaliser ) : ','s');
+    % just for us to avoid debugging
+    str = questdlg('Ajouter Rect Contrainte?','Resultats','oui','non', 'oui');
+    close(figureRect)
+
+    if strcmp(str, 'oui')
+        %% TODO draw rect process
+        figureRect = figure('Position', [850, 450, 900, 900]);
+        imagesc(image); axis image; axis off; hold on;
+        [c,h] = contour(L, 'LineWidth',3,'Color', 'g');
+        title('Dessigne Contrainte');
+        % rect =  [xmin ymin width height]. 
+        rect = getrect(figureRect)
+        close(figureRect)
+        
+        % create additive mask
+        
+        % OR additive mask to current mask
+
+    else
+        running = false
     end
     
-    % save current E for next loop
-    previousEnergy = E;
-    
-    % update our mask with current cut
-    masque = and(masque,~(L > ones(M,N)));
-    
-    
-    %% TODO avec notre masque finale, comparer le avec le masque de GT et
-    % output Dice index : https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
-    
-    
-    %% debug outputs
-    % store masks after 1 iteration
-    if currentIteration > 1
-        storedMask{currentIteration} = masque;
-    end
-    % sum of all white space. less is better
-    cropSize = sum(masque(:));
-    % 5) supression de l'objet de coupe de graphe
-    BK_Delete(BKhandle); % toujours appeler ceci e chaque fois qu'on utilise le grabcut.
-    clear BKhandle;
 end
+
+
+%% TODO avec notre masque finale, comparer le avec le masque de GT et
+% output Dice index : https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
 
 cropSize = sum(masque(:))
 
@@ -143,7 +180,6 @@ title(sprintf('Initial Mask on 1st iteration'))
 subplot(3,2,6)
 imshow(masque)
 title(sprintf('Final Mask after [%d] iterations', iterations))
-
 
 % plots only the first 10 masks
 figure2 = figure('Position', [50, 1200, 1900, 250]);
