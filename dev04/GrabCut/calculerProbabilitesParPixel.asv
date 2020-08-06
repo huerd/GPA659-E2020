@@ -4,7 +4,7 @@ function [objProbabilitees, bkgProbabilitees] = calculerProbabilitesParPixel(ima
 if(size(image,1) ~= size(masque,1) || size(image,2) ~= size(masque,2))
     error('L''image et le masque doivent avoir la meme taille MxN size.');
 end
-[M,N,O] = size(image);
+[M,N,~] = size(image);
 
 % normalisation des valeurs entre 0 et 1.0
 if(max(image(:)) > 1.0)
@@ -66,8 +66,8 @@ objProb = objPDF(idx);
 bkgProb = bkgPDF(idx);
 
 % Calcul des termes de regions pour chaque pixel
-objProbabilitees = -log(reshape(objProb,M,N,O));
-bkgProbabilitees = -log(reshape(bkgProb,M,N,O));
+objProbabilitees = -log(reshape(objProb,M,N));
+bkgProbabilitees = -log(reshape(bkgProb,M,N));
 
 % optionellement: penaliser les bordures pour qu'elles soient arriere-plan
 % w = max(max(objPDF(:)),max(bkgPDF(:)));

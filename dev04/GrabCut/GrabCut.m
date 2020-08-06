@@ -17,9 +17,10 @@ file_GT='GT'; % dossier contenant le ground truth.
 
 %% Variables qu'on peut modifier
 % Il y a 50 images dans le fichier, vous pouvez choisir un nombre entre 1 et 50
-im_number = 30; 
+% im_number = 13; %moon
+im_number = 15; %llama
 % le lamda pour le criete de regularisation, essayez lambda = 0, 5, 25, 50, 100, ...
-lambda = 25; 
+lambda = 5; 
 
 %% Chargement de l'image, initialisation et affichage
 image_name = image_set{im_number};
