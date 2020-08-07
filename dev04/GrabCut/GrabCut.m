@@ -142,8 +142,6 @@ while running
     prompted = true;
 end
 
-cropSize = sum(masque(:))
-
 %% TODO avec notre masque finale, comparer le avec le masque de GT et
 % output Dice index : https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
 
