@@ -145,7 +145,7 @@ end
 %% TODO avec notre masque finale, comparer le avec le masque de GT et
 % output Dice index : https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient
 
-
+diceValue = dice(logical(masque), logical(groundTruth))
 
 
 %% Affichage de la solution
@@ -177,7 +177,7 @@ title(sprintf('Initial Mask on 1st iteration'))
 % 
 subplot(3,2,6)
 imshow(masque)
-title(sprintf('Final Mask after [%d] iterations', iterations))
+title(sprintf('Final Mask after [%d] iterations. Dice Value = [%f]', iterations, diceValue))
 
 % plots only the first 10 masks
 figure2 = figure('Position', [50, 1200, 1900, 250],'Name', 'Iteration Masks');
